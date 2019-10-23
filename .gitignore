@@ -11,7 +11,7 @@ data/*/*
 results/*/*
 results/*.csv
 !/results/exp1/results.csv
-
+venv
 # ignore others
 *.h5
 *.pyc
