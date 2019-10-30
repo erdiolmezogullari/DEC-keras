@@ -21,6 +21,7 @@ from keras import callbacks
 from keras.initializers import VarianceScaling
 from sklearn.cluster import KMeans
 import metrics
+import pandas as pd
 
 
 def autoencoder(dims, act='relu', init='glorot_uniform'):
@@ -270,7 +271,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='train',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--dataset', default='usps',
+    parser.add_argument('--dataset', default='mnist',
                         choices=['mnist', 'fmnist', 'usps', 'reuters10k', 'stl'])
     parser.add_argument('--batch_size', default=256, type=int)
     parser.add_argument('--maxiter', default=2e4, type=int)
@@ -330,7 +331,17 @@ if __name__ == "__main__":
     dec.model.summary()
     t0 = time()
     dec.compile(optimizer=SGD(0.01, 0.9), loss='kld')
-    y_pred = dec.fit(x, y=y, tol=args.tol, maxiter=args.maxiter, batch_size=args.batch_size,
+    pred_y = dec.fit(x, y=y, tol=args.tol, maxiter=args.maxiter, batch_size=args.batch_size,
                      update_interval=update_interval, save_dir=args.save_dir)
-    print('acc:', metrics.acc(y, y_pred))
+    print('acc:', metrics.acc(y, pred_y))
     print('clustering time: ', (time() - t0))
+
+    assert len(pred_y) == len(y)
+
+    d = {
+        'pred_y': pred_y,
+        'actual_y': y
+    }
+
+    df = pd.DataFrame(d)
+    df.to_csv('cluster.csv', index=False)
